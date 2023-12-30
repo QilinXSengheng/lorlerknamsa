@@ -1,27 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final _firebase = FirebaseAuth.instance;
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<AuthScreen> createState() {
+    return _AuthScreenState();
+  }
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-
   final _form = GlobalKey<FormState>();
 
   var _isLogin = true;
   var _enteredEmail = '';
   var _enteredPassword = '';
 
-  void _submit() {
+  void _submit() async {
     final isValid = _form.currentState!.validate();
 
-    if (isValid) {
-      _form.currentState!.save();
+    if (!isValid) {
+      return;
+    }
 
+    _form.currentState!.save();
 
+    try {
+      if (_isLogin) {
+        final userCredentials = await _firebase.signInWithEmailAndPassword(
+            email: _enteredEmail, password: _enteredPassword);
+        print(userCredentials);
+      } else {
+        final userCredentials = await _firebase.createUserWithEmailAndPassword(
+            email: _enteredEmail, password: _enteredPassword);
+        print(userCredentials);
+      }
+    } on FirebaseAuthException catch (error) {
+      if (error.code == 'email-already-in-use') {
+        // ...
+      }
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message ?? 'Authentication failed.'),
+        ),
+      );
     }
   }
 
@@ -36,7 +62,11 @@ class _AuthScreenState extends State<AuthScreen> {
             children: [
               Container(
                 margin: const EdgeInsets.only(
-                    bottom: 20, top: 30, left: 20, right: 20),
+                  top: 30,
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                ),
                 width: 200,
                 child: Image.asset('assets/images/chat.png'),
               ),
@@ -51,9 +81,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           TextFormField(
-                            keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
-                                labelText: 'Email address'),
+                                labelText: 'Email Address'),
+                            keyboardType: TextInputType.emailAddress,
                             autocorrect: false,
                             textCapitalization: TextCapitalization.none,
                             validator: (value) {
@@ -62,6 +92,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   !value.contains('@')) {
                                 return 'Please enter a valid email address.';
                               }
+
                               return null;
                             },
                             onSaved: (value) {
@@ -72,16 +103,13 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration:
                                 const InputDecoration(labelText: 'Password'),
                             obscureText: true,
-                            autocorrect: false,
                             validator: (value) {
-                              if (value == null ||
-                                  value.trim().isEmpty ||
-                                  value.trim().length < 8) {
-                                return 'Password must be at least 8 characters long.';
+                              if (value == null || value.trim().length < 6) {
+                                return 'Password must be at least 6 characters long.';
                               }
                               return null;
                             },
-                             onSaved: (value) {
+                            onSaved: (value) {
                               _enteredPassword = value!;
                             },
                           ),
@@ -92,13 +120,8 @@ class _AuthScreenState extends State<AuthScreen> {
                               backgroundColor: Theme.of(context)
                                   .colorScheme
                                   .primaryContainer,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 8),
                             ),
-                            child: Text(_isLogin ? 'Login' : 'Sign Up!'),
+                            child: Text(_isLogin ? 'Login' : 'Signup'),
                           ),
                           TextButton(
                             onPressed: () {
