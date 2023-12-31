@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-class ChartScreen extends StatelessWidget {
-  const ChartScreen({super.key});
+import 'package:lorlerknamsa/widgets/chat_messages.dart';
+import 'package:lorlerknamsa/widgets/new_message.dart';
+class ChatScreen extends StatelessWidget {
+  const ChatScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +22,13 @@ class ChartScreen extends StatelessWidget {
             )
           ],
         ),
-        body: const Center(
-          child: Text('Logged In'),
-        ));
+        body: const Column(
+          children: [
+            Expanded(child: ChatMessages()),
+            NewMessage(),
+          ],
+          )
+        
+      );
   }
 }

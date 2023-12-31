@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lorlerknamsa/screens/auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:lorlerknamsa/screens/chart.dart';
+import 'package:lorlerknamsa/screens/chat.dart';
 import 'package:lorlerknamsa/screens/splash.dart';
 import 'firebase_options.dart';
 
@@ -33,7 +33,7 @@ class App extends StatelessWidget {
           }
 
           if (snapshot.hasData) {
-            return const ChartScreen();
+            return const ChatScreen();
           }
           return const AuthScreen();
         },
